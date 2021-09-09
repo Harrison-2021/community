@@ -37,4 +37,43 @@
             @Autowired，在类属性前注入，获取目标Bean，默认是@Primary注解的Bean
             @Qualifier,写上Bean的名字，可以自动装配改名字的Bean
         10. 项目中调用流程：Controller调用Service，Service调用DAO，都是用依赖注入的方式调用
-	
+   5. Spring MVC，注意三层架构和MVC不是一回事
+        1. DispatcherServlet是整个SpringMVC的核心
+            首先，浏览器的请求都由FrontController前端控制器中的DispatcherServlet类来控制，
+            DispatcherServlet根据映射的注解找到Controller，将请求下发，
+                然后Controller会把数据封装到model里将回复返回给前端控制器
+            前端控制器得到回复后，会调用View template，并将model给模板，template中的动态符号会用model中动态值替换，生成动态网页
+                View中生成一个html后返回前端控制器，控制器将html响应给浏览器
+        2. 模板引擎用的是Thymeleaf，在配置文件中进行配置
+            1.将默认的缓存关掉，可以实时更新页面，上线时候可以再开启，降低服务器压力
+                spring.thymeleaf.cache=false
+            2. 接收请求和响应的底层实现，request，response
+            3. 框架中简单的操作，请求数据的处理，框架已经将底层操作包装好了
+                1. get请求，/students?current=1&limit=20，
+                    @RequestMapping(path="",method=RequestMethod.GET),先解析相对路径，和请求方法
+                    方法中传入参数， 加入注解@RequestParam，required，是否一定要写入参数，defaultValue，默认值
+                2. get请求中，将参数当成路径的一部分，即/student/123
+                    @RequestMapping(path = "/student/{id}", method = RequestMethod.GET)
+                    @PathVariable("id") int id
+                3. post请求，get请求是在路径上传的，传输的东西较多，且内容不能被显示出来时，用post
+                    1. 创建一个静态网页，新建一个html的表单，
+                        表单中注明请求方法，请求的url相对地址，注意是相对于根目录
+                        创建两个输入框，一个保存按钮，注意类型，名称
+                    2. 在Controller层书写获取post的请求，传入的参数只要和表单一致，就可以获取请求，可以直接写不用写注解
+            4. 框架中响应数据的处理
+                1.  响应html动态数据，不加ResponseBody，返回类型是ModelAndView，将model与view的数据都装进一个对象里
+                    1. 先实例化对象 modelAndView，
+                    2. 将动态的要响应的值传入，addObject
+                    3. 跳转到动态资源文件，即模板，进行渲染，setVieName，传入目标模板路径的文件名
+                        1，先将模板进行声明，注明是动态模板，xmlns:th="http://www.thymeleaf.org"
+                        2. 用th:text="${name}"获取变量
+	            2. 第二种响应方式，用model对象。自动实例话model对象，直接装数据
+	                    1. addAttribute
+	            3. 区别：ModelAndView，将model与view的数据都装进一个对象里
+	                     model，将model作为参数传入，自动创建model实例，在model种装入数据，返回的视图view直接作为返回给控制器DispatcherServlet
+                4. 响应JSON数据，异步请求，当前网页不动，悄悄的访问服务器一次
+                    响应JSON数据(异步请求)
+                    Java对象 -> JSON字符串 -> JS对象
+                    @ResponseBody如果想返回js对象，必须加这个
+                        定义一个map存储数据，DispatcherSer识别后，会自动将map转成一个js字符串返回给浏览器
+                        也可以定义一个List集合，集合内装map
