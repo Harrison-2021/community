@@ -77,3 +77,21 @@
                     @ResponseBody如果想返回js对象，必须加这个
                         定义一个map存储数据，DispatcherSer识别后，会自动将map转成一个js字符串返回给浏览器
                         也可以定义一个List集合，集合内装map
+   6. MyBatis初步：
+        1. 配置数据库，连接池，映射文件等配置
+        2. 要用实体类封装表里的数据，在entity包下新建User实体类，将变量定义好，并定义好get与set方法
+        3. 在dao层处理数据库，只需实现接口，添加MyBatis的注解@Mapper，
+            在接口中只需声明方法，即增删改查，注意返回类型
+            然后在mapper包下创建一个xml文件中进行配置注解sql语句
+        4. 在Mybatis官网入门找到配置文件模板
+            1. 修改namespace，对应到要配置的接口，为哪个接口服务，对应到哪个接口
+            2. 在主体里要写各种标签，每个标签对应接口中的一个方法
+                标签即sql语句的select，insert，update，delete等
+                要注明id，id对应到方法名，resultType注明返回的类型，按理说要将实体类的全限定名，但，配置中注解了，可以省略包名
+                用#{id}引用实体类中的变量，即方法中的变量
+                    注意，若参数不是基本类型，而是自定义的Bean类型，要进行声明，用parameterType
+                    注意，增加时候，要配置主键声明：keyProperty，mysql底层会自动生成id，mybatis会得到这个id
+                为了解决重复写字段，可以先用<sql,id="selectFields">...</sql>将字段定义好，后面直接引用就行
+                    引用时，用<include refid="selectFields"></include>标签
+        5. 为了便于调试，将logger配置调低些，打印出更多消息
+            logger.level.com.nowcoder.community=debug
