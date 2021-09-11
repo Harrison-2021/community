@@ -42,11 +42,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-<!--		依赖数据库-->
+<!--		依赖数据库， 版本一定要与idea设置的一致-->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.16</version>
+			<version>8.0.25</version>
 		</dependency>
 
 		<dependency>
