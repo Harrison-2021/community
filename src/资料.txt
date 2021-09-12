@@ -95,3 +95,67 @@
                     引用时，用<include refid="selectFields"></include>标签
         5. 为了便于调试，将logger配置调低些，打印出更多消息
             logger.level.com.nowcoder.community=debug
+   7. 社区首页开发，
+        1. 处理dao层，创建实例封装表数据->dao层创建mapper接口->配置xml文件处理sql语句->测试
+        2. 开发业务层：service层，新建类，与测试代码类似，主要处理数据
+            1. 在DiscussPastService类中，与mapper接口方法类似，实现具体查找讨论内容的方法
+            2. 将id与用户信息结合，单独查到user
+        3. 将resource目录下的配置文件树状结构在idea设置中打开
+            1. 将静态资源css，img,js放到静态目录下，将site，index.html首页，和mail页面放到模板中
+        4. 开发视图层，即controller，HomeController
+            1. 将service层注入进来
+            2. 设定url，/index, method,get
+               返回模板路径
+            3. 主体逻辑，查询10条数据，返回list
+                将查到的数据组装，即将post帖子与用户信息依次遍历，放到一个装有映射容器的列表容器中
+                将组装的集合信息放到model中反馈给前端页面
+            4. 处理模板页面：index.html
+                1. 先配置模板引擎xmlns:th="http://www.thymeleaf.org"
+                2. 对于头文件中的相对路径，要用th：href="@{/../..}"修饰，让模板去找到动态页面
+                3. 修改帖子列表内容，只保留一个li标签，在此标签里进行遍历输出
+                    th:each="map:${传入要遍历的集合}",map是遍历后返回的类型
+                    找到要改变的动态遍历，前面用th:修饰，在书写变量出用格式${map.user.headerUrl}，模板自动调用get方法
+                    链接没开始写，可以先用#替代，防止误点，这样链接到帖子顶部,
+                    用th:text="${}"书写文本内容，
+                        用th:utext="${}"，将转义字符自动识别正确显示，例如，&lt 为 <
+                    用th:if="${}"进行判断
+                    用th:text="${#dates.format(数据，‘yyyy-MM-dd HH:mm:ss'}" 用#引用模板工具
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
