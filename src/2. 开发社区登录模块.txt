@@ -11,5 +11,62 @@
         利用模板生成动态网页
         用框架发发邮件，内容是模板引擎获取的内容
 
-二、开发注册功能
+二、开发注册功能，有三次请求
+    1. 访问注册页面
+        1. LoginController,建立方法，getRegisterPage,访问路径，返回模板路径
+        2. 在模板页面中，添加模板声明
+        3. 首页注册链接写好，即将首页，注册路径定义好
+        4. 头部复用，取名为th:fragment="header"
+            在其他页面模板中，想要复用，th:replace="index::header"
+    2. 提交注册数据
+        1. 准备工作，配置，注入相关依赖包，写个工具类，CommunityUtil
+            1. 一个静态方法，生成一个随机字符串，generateUUID,
+                注意要将所有UUID中的横线替换成空
+            2. MD5加密，虽然MD5不能反向破解，但防止有MD5库，简单密码会对应到库中数据
+                密码加上一个随机的salt，不能破解
+                先判断是否为空，StringUtils.isBlank(key)
+                使用Spring自带的md5加密，DigestUtils.md5DigestAsHex(key.getBytes())
+        2. 在业务层UserService处理，先注入邮件客户端，模板引擎，
+            1. 用@Value("${}"配置文件中的域名和项目名
+            2. 添加注册方法，返回一个map，先对传入的参数判断，
+                1. 空值处理，
+                    传入参数为空，逻辑错误，抛异常
+                    user传入了，但user不合理，即用户名，密码为空，邮箱为空，放在map里，返回给客户端
+                2. 验证账号
+                    从库中查看账号名，若账号已经存在，即重复注册，返回错误信息
+                3. 验证邮箱
+                    从库总中查看邮箱，判断是否存在
+                4. 注册用户
+                    先建立新的用户对象，入库
+                    setSalt，setPassword, setType,setStatus,SetActivationCode,激活码，
+                        setHeaderUrl，setCreateTime
+                5. 将静态激活页面，改成动态模板，用模板激活邮件
+                    设置激活路径，是动态拼写
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
