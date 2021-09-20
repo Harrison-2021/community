@@ -1,6 +1,5 @@
 package com.nowcoder.community.controller;
 
-import com.nowcoder.community.entity.CommunityConstant;
 import com.nowcoder.community.service.AlphaService;
 import com.nowcoder.community.util.CommunityUtil;
 import org.springframework.beans.factory.annotation.Autowired;

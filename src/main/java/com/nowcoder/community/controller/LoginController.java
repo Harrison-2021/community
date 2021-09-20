@@ -1,19 +1,20 @@
 package com.nowcoder.community.controller;
 
 import com.google.code.kaptcha.Producer;
-import com.nowcoder.community.entity.CommunityConstant;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
@@ -31,16 +32,22 @@ public class LoginController implements CommunityConstant {
     @Autowired
     Producer kaptchaProducer;
 
+    @Value("server.servlet.context-path")
+    String contextPath;
+
+    /** 注册页面显示*/
     @RequestMapping(path = "/register", method = RequestMethod.GET)
     public String getRegisterPage() {
         return "/site/register";
     }
 
+    /** 登录页面显示*/
     @RequestMapping(path = "/login", method = RequestMethod.GET)
     public String getLoginPage() {
         return "/site/login";
     }
 
+    /** 注册页面请求*/
     @RequestMapping(path = "/register", method = RequestMethod.POST)
     public String register(Model model, User user) {
         Map<String, Object> map = userService.register(user); // 接收用户注册业务层反馈的信息，用户注册业务也已经启动
@@ -57,6 +64,7 @@ public class LoginController implements CommunityConstant {
         }
     }
 
+    /** 激活码跳转页面显示*/
     // http://localhost:8080/community/activation/101/code
     @RequestMapping(path = "/activation/{userId}/{code}", method = RequestMethod.GET)
     public String activation(Model model, @PathVariable("userId") int userId, @PathVariable("code") String code) {
@@ -74,7 +82,7 @@ public class LoginController implements CommunityConstant {
         return "/site/operate-result";
     }
 
-    /** 生成验证码图片网页*/
+    /** 生成验证码图片网页显示*/
     @RequestMapping(path = "/kaptcha", method = RequestMethod.GET)
     public void getKaptcha(HttpServletResponse response, HttpSession session) {
         // 生成验证码
@@ -93,6 +101,44 @@ public class LoginController implements CommunityConstant {
         } catch (IOException e) {
             logger.error("响应验证码失败：" + e.getMessage());
         }
-
     }
+
+    /** 登录页面请求*/
+    @RequestMapping(path = "/login", method = RequestMethod.POST)
+    public String login(Model model, String username, String password, String code,
+                        @RequestParam(value = "rememberMe", defaultValue = "false") Boolean rememberMe,
+                        HttpServletResponse response,
+                        HttpSession session) {
+        // 先判断验证码,从session中获取
+        String kaptcha = (String)session.getAttribute("kaptcha");
+        if(StringUtils.isBlank(kaptcha) || StringUtils.isBlank(code) || !kaptcha.equalsIgnoreCase(code)) {
+            model.addAttribute("codeMsg", "验证码不正确!");
+            return "/site/login";
+        }
+
+        // 检查账号，密码, 注意登录有效时间,如果验证无误，登录成功，跳转主页前要将ticket传给浏览器的cookie保存
+        int expiredSeconds = rememberMe ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
+        Map<String, Object> map = userService.login(username, password, expiredSeconds);
+        if(map.containsKey("ticket")) { // map中有ticket，说明登录信息验证成功，并下发了ticket，且在数据库中有备份
+            Cookie cookie = new Cookie("ticket", map.get("ticket").toString());
+            cookie.setPath(contextPath);
+            // 注意cookie是以秒为单位计时间的，但java中的Date类是以毫秒为单位计时间的
+            cookie.setMaxAge(expiredSeconds);
+            response.addCookie(cookie);
+            return "redirect:/index";
+        } else {
+            model.addAttribute("usernameMsg", map.get("usernameMsg"));
+            model.addAttribute("passwordMsg", map.get("passwordMsg"));
+            return "/site/login";
+        }
+    }
+
+    /** 登出页面请求*/
+    @RequestMapping(path = "/logout", method = RequestMethod.GET)
+    public String logout(@CookieValue("ticket") String ticket) {
+        userService.logout(ticket);
+        return "/site/login";
+    }
+
 }
+
