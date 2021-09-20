@@ -166,6 +166,12 @@ public class UserService implements CommunityConstant {
 
     /** 登出业务处理*/
     public void logout(String ticket) {
+
         loginTicketMapper.updateLoginTicket(ticket, 1);
+    }
+
+    /** 查询t票业务*/
+    public LoginTicket selectByTicket(String ticket) {
+        return loginTicketMapper.selectByTicket(ticket);
     }
 }
