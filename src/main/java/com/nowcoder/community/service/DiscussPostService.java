@@ -17,14 +17,22 @@ public class DiscussPostService {
     @Autowired
     private SensitiveFilter sensitiveFilter;
 
+    // 查询指定起始位置，上限的帖子数
     public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit) {
         return discussPostMapper.selectDiscussPosts(userId, offset, limit);
     }
 
+    // 查询帖子数
     public int findDiscussPostRows(int userId) {
         return discussPostMapper.selectDiscussPostRows(userId);
     }
 
+    // 查询指定帖子id的帖子信息
+    public DiscussPost findDiscussPostById(int id) {
+        return discussPostMapper.selectDiscussPostById(id);
+    }
+
+    // 添加帖子内容
     public int addDiscussPostRows(DiscussPost discussPost) {
         // 要判断参数是否为空
         // 要进行敏感词过滤，转义HTML标记过滤
@@ -42,4 +50,5 @@ public class DiscussPostService {
 
         return discussPostMapper.insertDiscussPostRows(discussPost);
     }
+
 }

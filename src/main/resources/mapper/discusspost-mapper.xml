@@ -12,6 +12,7 @@
         user_id, title, content, type, status, create_time, comment_count, score
     </sql>
 
+<!--    查询帖子行数-->
     <select id="selectDiscussPosts" resultType="DiscussPost">
         select <include refid="selectFields"></include>
         from discuss_post
@@ -31,6 +32,13 @@
         <if test="userId!=0">
             and user_id = #{userId}
         </if>
+    </select>
+
+<!--    根据帖子的id查询指定的帖子内容-->
+    <select id="selectDiscussPostById" resultType="DiscussPost">
+        select <include refid="selectFields"></include>
+        from discuss_post
+        where id = #{id}
     </select>
 
 <!--    添加帖子-->
