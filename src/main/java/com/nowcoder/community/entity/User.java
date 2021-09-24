@@ -10,7 +10,7 @@ public class User {
     private String email;
     private int type;
     private int status;
-    private String activationCode;
+    private String activationCode; // 激活码
     private String headerUrl;
     private Date createTime;
 

@@ -51,4 +51,9 @@ public class DiscussPostService {
         return discussPostMapper.insertDiscussPostRows(discussPost);
     }
 
+    // 更新帖子评论数
+    int updateCommentCount(int id, int commentCount) {
+        return discussPostMapper.updateCommentCount(id, commentCount);
+    }
+
 }

@@ -4,8 +4,8 @@ import java.util.Date;
 
 public class DiscussPost {
 
-    private int id;
-    private int userId;
+    private int id; // 帖子的id
+    private int userId; // 帖子关联的用户id
     private String title;
     private String content;
     private int type;
