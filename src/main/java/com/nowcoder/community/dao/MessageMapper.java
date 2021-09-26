@@ -22,4 +22,10 @@ public interface MessageMapper {
     // 查询未读私信的数量，注意，分两者情况，当前用户的私信，以及某个会化的私信，要在sql中动态拼接
     // 私信的逻辑是，当前用户信息显示所有与之相关的私信总和，列表中的每个会话中显示当前会话用户与当前用户之间的所有私信总和
     int selectLetterUnreadCount(int userId, String conversationId);
+
+    // 新增消息
+    int insertMessage(Message message);
+
+    // 修改消息的状态
+    int updateMessage(List<Integer> ids, int status);
 }
