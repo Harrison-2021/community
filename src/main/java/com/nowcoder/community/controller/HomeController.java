@@ -4,7 +4,9 @@ import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.DiscussPostService;
+import com.nowcoder.community.service.MessageService;
 import com.nowcoder.community.service.UserService;
+import com.nowcoder.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +25,12 @@ public class HomeController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    HostHolder hostHolder;
+
+    @Autowired
+    MessageService messageService;
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page) {
@@ -43,6 +51,12 @@ public class HomeController {
             }
         }
         model.addAttribute("discussPosts", discussPosts);
+
+        // 消息列表显示总数
+        User user = hostHolder.getUser();
+        int letterUnreadCount = messageService.findLetterUnreadCount(user.getId(), null);
+        model.addAttribute("letterUnreadCount", letterUnreadCount);
+
         return "/index";
     }
 }

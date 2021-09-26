@@ -1,13 +1,7 @@
 package com.nowcoder.community;
 
-import com.nowcoder.community.dao.CommentMapper;
-import com.nowcoder.community.dao.DiscussPostMapper;
-import com.nowcoder.community.dao.LoginTicketMapper;
-import com.nowcoder.community.dao.UserMapper;
-import com.nowcoder.community.entity.Comment;
-import com.nowcoder.community.entity.DiscussPost;
-import com.nowcoder.community.entity.LoginTicket;
-import com.nowcoder.community.entity.User;
+import com.nowcoder.community.dao.*;
+import com.nowcoder.community.entity.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +27,9 @@ public class MapperTest {
 
     @Autowired
     CommentMapper commentMapper;
+
+    @Autowired
+    MessageMapper messageMapper;
 
     @Test
     public void testSelectUser() {
@@ -111,4 +108,28 @@ public class MapperTest {
         comment.setContent("12345");
         commentMapper.insertComment(comment);
     }
+
+    @Test
+    public void testSelectLetters() {
+        int i = 0;
+        List<Message> list = messageMapper.selectConversations(111, 0, 20);
+        for(Message message : list) {
+            System.out.println((++i) + " : " + message);
+        }
+
+        System.out.println("111会话列表总数 " + messageMapper.selectConversationCount(111));
+
+        list = messageMapper.selectLetters("111_112", 0, 10);
+        i = 0;
+        for(Message message : list) {
+            System.out.println((++i) + " : " + message);
+        }
+
+        System.out.println("111与112会话列表总数 " + messageMapper.selectLetterCount("111_112"));
+
+        System.out.println("111未读私信总数 " + messageMapper.selectLetterUnreadCount(131, null));
+        System.out.println("111_131未读私信总数 " + messageMapper.selectLetterUnreadCount(131, "111_131"));
+
+    }
+
 }

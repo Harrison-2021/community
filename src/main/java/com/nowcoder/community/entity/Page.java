@@ -11,7 +11,7 @@ public class Page {
     private int limit = 10;
     // 数据总数(用于计算总页数)
     private int rows;
-    // 查询路径(用于复用分页链接)
+    // 查询路径(用于复用分页链接),每次都刷新请求的url，但根据offset和limit的不同，查询的数据不同，因此，显示的信息不同
     private String path;
 
     public int getCurrent() {
