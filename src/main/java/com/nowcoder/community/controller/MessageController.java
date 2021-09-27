@@ -31,6 +31,9 @@ public class MessageController {
     /** 私信列表显示 */
     @RequestMapping(path = "/letter/list", method = RequestMethod.GET)
     public String getLetterList(Model model, Page page) {
+        // 报错异常处理实例
+        //Integer.valueOf("abc");
+
         User user = hostHolder.getUser();
 
         // 分页信息
@@ -120,6 +123,7 @@ public class MessageController {
     @RequestMapping(path = "/letter/send", method = RequestMethod.POST)
     @ResponseBody
     public String sendLetter(String toName, String content) {
+//        Integer.valueOf("avs");
         User target = userService.findUserByName(toName);
 
         if(target == null) {

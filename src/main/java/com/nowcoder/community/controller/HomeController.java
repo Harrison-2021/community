@@ -54,9 +54,16 @@ public class HomeController {
 
         // 消息列表显示总数
         User user = hostHolder.getUser();
-        int letterUnreadCount = messageService.findLetterUnreadCount(user.getId(), null);
-        model.addAttribute("letterUnreadCount", letterUnreadCount);
-
+        if(user != null) {
+            int letterUnreadCount = messageService.findLetterUnreadCount(user.getId(), null);
+            model.addAttribute("letterUnreadCount", letterUnreadCount);
+        }
         return "/index";
+    }
+
+    // 统一配置错误页面请求
+    @RequestMapping(path = "/error", method = RequestMethod.GET)
+    public String getErrorPage() {
+        return "/error/500";
     }
 }
