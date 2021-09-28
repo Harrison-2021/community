@@ -2,6 +2,7 @@ package com.nowcoder.community.controller;
 
 import com.nowcoder.community.controller.annotation.LoginRequired;
 import com.nowcoder.community.entity.User;
+import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.service.UserService;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
@@ -43,6 +44,9 @@ public class UserController {
 
     @Value("${community.path.upload}")
     private String uploadPath;
+
+    @Autowired
+    private LikeService likeService;
 
     /** 显示账号设置页面*/
     @LoginRequired
@@ -113,5 +117,23 @@ public class UserController {
         } catch (IOException e) {
             logger.error("读取头像失败: " + e.getMessage());
         }
+    }
+
+    // 个人主页显示，包括点赞数，关注人数等信息
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+        User user = userService.findUserById(userId);
+        if(user == null) {
+            throw new IllegalArgumentException("该用户不存在!");
+        }
+
+        // 要将用户加入模板，好渲染用户相关信息
+        model.addAttribute("user", user);
+
+        // 获取点赞数
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
+
+        return "/site/profile";
     }
 }

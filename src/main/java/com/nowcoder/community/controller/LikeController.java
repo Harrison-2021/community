@@ -22,12 +22,13 @@ public class LikeController implements CommunityConstant {
     @Autowired
     private HostHolder hostHolder;
 
+    // 点赞操作，json获取信息处理页面，redis储存时实更新的点赞数据
     @RequestMapping(path = "/like", method = RequestMethod.POST)
     @ResponseBody
-    public String like(int entityType, int entityId) {
+    public String like(int entityType, int entityId, int entityUserId) {
         User user = hostHolder.getUser();
         // 点赞
-        likeService.like(user.getId(), entityType, entityId);
+        likeService.like(user.getId(), entityType, entityId, entityUserId);
         // 数量
         long likeCount = likeService.findEntityLikeCount(entityType, entityId);
         // 状态
@@ -39,5 +40,4 @@ public class LikeController implements CommunityConstant {
 
         return CommunityUtil.getJSONString(0, null, map);
     }
-
 }

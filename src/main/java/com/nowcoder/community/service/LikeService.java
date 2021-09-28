@@ -2,7 +2,10 @@ package com.nowcoder.community.service;
 
 import com.nowcoder.community.util.RedisLikeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,18 +14,31 @@ public class LikeService {
     private RedisTemplate redisTemplate;
 
     // 点赞
-    public void like(int userId, int entityType, int entityId) {
-        String entityLikeKey = RedisLikeUtil.getEntityLikeKey(entityType, entityId);
+    // 对帖子点赞，底层结构是集合，因为对同一个帖子点赞的用户可以有很多，但一个用户只能点赞一次，即不能重复
+    // 统计用户获取的点赞数量，用字符串就行，即每个用户的点赞数对象就一个，只有增加或减少，只统计一个点赞总数，并没有列出具体谁点赞
+    public void like(int userId, int entityType, int entityId, int entityUserId) {
+        redisTemplate.execute(new SessionCallback() {
+            @Override
+            public Object execute(RedisOperations operations) throws DataAccessException {
+                String entityLikeKey = RedisLikeUtil.getEntityLikeKey(entityType, entityId);
+                String userLikeKey = RedisLikeUtil.getUserLikeKey(entityUserId);
+                // 在事务启动前查询
+                boolean isMember = operations.opsForSet().isMember(entityLikeKey, userId);
 
-        // 要先判断是否已经点过赞了，如果点过了，处理逻辑是取消点赞，不是add，而是remove
-        boolean isMember = redisTemplate.opsForSet().isMember(entityLikeKey, userId);
+                operations.multi();
 
-        if(isMember) {
-            redisTemplate.opsForSet().remove(entityLikeKey, userId);
-        } else {
-            redisTemplate.opsForSet().add(entityLikeKey, userId);
-        }
+                if(isMember) {
+                    operations.opsForSet().remove(entityLikeKey, userId);
+                    operations.opsForValue().decrement(userLikeKey);
+                } else {
+                    operations.opsForSet().add(entityLikeKey, userId);
+                    operations.opsForValue().increment(userLikeKey);
+                }
+                return operations.exec();
+            }
+        });
     }
+
     // 查询某实体点赞数量
     public long findEntityLikeCount(int entityType, int entityId) {
         String entityLikeKey = RedisLikeUtil.getEntityLikeKey(entityType, entityId);
@@ -34,5 +50,13 @@ public class LikeService {
         String entityLikeKey = RedisLikeUtil.getEntityLikeKey(entityType, entityId);
 
         return redisTemplate.opsForSet().isMember(entityLikeKey, userId) ? 1 : 0;
+    }
+
+    // 查询某个用户获得的赞
+    public int findUserLikeCount(int userId) {
+        String userLikeKey = RedisLikeUtil.getUserLikeKey(userId);
+
+        Integer count = (Integer) redisTemplate.opsForValue().get(userLikeKey);
+        return count == null ? 0 : count.intValue();
     }
 }
