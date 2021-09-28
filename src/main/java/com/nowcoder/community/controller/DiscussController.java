@@ -6,6 +6,7 @@ import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.CommentService;
 import com.nowcoder.community.service.DiscussPostService;
+import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.service.UserService;
 import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
@@ -34,6 +35,9 @@ public class DiscussController implements CommunityConstant{
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private LikeService likeService;
 
     // 处理添加发布帖子请求，与JSON交互，不用刷新网页，只是向网页增添信息
     @RequestMapping(path = "/add", method = RequestMethod.POST)
@@ -65,6 +69,12 @@ public class DiscussController implements CommunityConstant{
         // 作者，即获取帖子的用户信息，一并显示出来
         User user = userService.findUserById(post.getUserId());
         model.addAttribute("user", user);
+        // 帖子赞的数量
+        long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
+        model.addAttribute("likeCount", likeCount);
+        // 帖子赞的状态,0表示未点赞，1为点赞，未登录状态时，一定显示未点赞状态
+        int likeStatus = hostHolder.getUser() == null ? 0 :likeService.findEntityLikeStatus(ENTITY_TYPE_POST, post.getId(), hostHolder.getUser().getId());
+        model.addAttribute("likeStatus", likeStatus);
 
         // 评论分页信息
         page.setLimit(5);
@@ -89,6 +99,12 @@ public class DiscussController implements CommunityConstant{
                 commentVoMap.put("comment", comment);
                 // 作者、拿到一级评论信息对应的用户名和用户头像信息
                 commentVoMap.put("user", userService.findUserById(comment.getUserId())); // id要对应好，不要错了
+                // 帖子赞的数量
+                likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT, comment.getId());
+                commentVoMap.put("likeCount", likeCount);
+                // 帖子赞的状态,0表示未点赞，1为点赞，未登录状态时，一定显示未点赞状态
+                likeStatus = hostHolder.getUser() == null ? 0 :likeService.findEntityLikeStatus(ENTITY_TYPE_COMMENT, comment.getId(), hostHolder.getUser().getId());
+                commentVoMap.put("likeStatus", likeStatus);
 
                 // 回复列表
                 // 因为每个一级评论可能有对应的回复信息，将所有与当前一级评论相关的回复显示出来
@@ -107,6 +123,13 @@ public class DiscussController implements CommunityConstant{
                         // 回复目标作者
                         User target = reply.getTargetId() == 0 ? null : userService.findUserById(reply.getTargetId());
                         replyVoMap.put("target", target);
+
+                        // 帖子赞的数量
+                        likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT, reply.getId());
+                        replyVoMap.put("likeCount", likeCount);
+                        // 帖子赞的状态,0表示未点赞，1为点赞，未登录状态时，一定显示未点赞状态
+                        likeStatus = hostHolder.getUser() == null ? 0 :likeService.findEntityLikeStatus(ENTITY_TYPE_COMMENT, reply.getId(), hostHolder.getUser().getId());
+                        replyVoMap.put("likeStatus", likeStatus);
 
 
                         replyVoList.add(replyVoMap);

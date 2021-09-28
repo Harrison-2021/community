@@ -4,10 +4,13 @@ import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.DiscussPostService;
+import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.service.MessageService;
 import com.nowcoder.community.service.UserService;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
     @Autowired
     DiscussPostService discussPostService;
 
@@ -31,6 +34,12 @@ public class HomeController {
 
     @Autowired
     MessageService messageService;
+
+    @Autowired
+    RedisTemplate redisTemplate;
+
+    @Autowired
+    LikeService likeService;
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page) {
@@ -48,6 +57,8 @@ public class HomeController {
                 User user = userService.findUserById(post.getUserId());
                 map.put("user", user);
                 discussPosts.add(map);
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount", likeCount);
             }
         }
         model.addAttribute("discussPosts", discussPosts);
