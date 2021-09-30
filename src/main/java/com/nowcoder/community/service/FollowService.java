@@ -2,13 +2,12 @@ package com.nowcoder.community.service;
 
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.util.CommunityConstant;
-import com.nowcoder.community.util.RedisLikeUtil;
+import com.nowcoder.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.expression.Operation;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -28,8 +27,8 @@ public class FollowService implements CommunityConstant {
         redisTemplate.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
-                String followeeKey = RedisLikeUtil.getFolloweeKey(userId, entityType);
-                String followerKey = RedisLikeUtil.getFollowerKey(entityType, entityId);
+                String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
+                String followerKey = RedisKeyUtil.getFollowerKey(entityType, entityId);
 
                 operations.multi();
 
@@ -46,8 +45,8 @@ public class FollowService implements CommunityConstant {
         redisTemplate.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
-                String followeeKey = RedisLikeUtil.getFolloweeKey(userId, entityType);
-                String followerKey = RedisLikeUtil.getFollowerKey(entityType, entityId);
+                String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
+                String followerKey = RedisKeyUtil.getFollowerKey(entityType, entityId);
 
                 operations.multi();
 
@@ -61,24 +60,24 @@ public class FollowService implements CommunityConstant {
 
     // 查询关注的实体数量
     public long findFolloweeCount(int userId, int entityType) {
-        String followeeKey = RedisLikeUtil.getFolloweeKey(userId, entityType);
+        String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
         return redisTemplate.opsForZSet().zCard(followeeKey);
     }
 
     // 查询实体的粉丝的数量
     public long findFollowerCount(int entityType, int entityId) {
-        String followerKey = RedisLikeUtil.getFollowerKey(entityType, entityId);
+        String followerKey = RedisKeyUtil.getFollowerKey(entityType, entityId);
         return redisTemplate.opsForZSet().zCard(followerKey);
     }
     // 查询当前用户是否已关注该实体
     public boolean hasFollowed(int userId, int entityType, int entityId) {
-        String followeeKey = RedisLikeUtil.getFolloweeKey(userId, entityType);
+        String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
         return redisTemplate.opsForZSet().score(followeeKey, entityId) != null;
     }
 
     // 查询关注的实体列表,要将用户信息一块封装进来，简化代码，特别是要拿出redis储存的关注时间
     public List<Map<String, Object>> followeeList(int userId, int offset, int limit) {
-        String followeeKey = RedisLikeUtil.getFolloweeKey(userId, ENTITY_TYPE_USER);
+        String followeeKey = RedisKeyUtil.getFolloweeKey(userId, ENTITY_TYPE_USER);
 
         // redis内部对set集合做了有序的处理
         targetIds = redisTemplate.opsForZSet().reverseRange(followeeKey, offset, offset + limit - 1);
@@ -103,7 +102,7 @@ public class FollowService implements CommunityConstant {
 
     // 查询关注的粉丝的列表
     public List<Map<String, Object>> findFollowers(int userId, int offset, int limit) {
-        String followerKey = RedisLikeUtil.getFollowerKey(ENTITY_TYPE_USER, userId);
+        String followerKey = RedisKeyUtil.getFollowerKey(ENTITY_TYPE_USER, userId);
         Set<Integer> targetIds = redisTemplate.opsForZSet().reverseRange(followerKey, offset, offset + limit - 1);
 
         if (targetIds == null) {
