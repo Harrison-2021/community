@@ -28,4 +28,13 @@ public interface MessageMapper {
 
     // 修改消息的状态
     int updateMessage(List<Integer> ids, int status);
+
+    // 查询系统发送给特定主题的最新一条消息
+    int selectTopicMessage(int userId, String topic);
+
+    // 查询系统发送给特定主题的消息数量
+    int selectTopicCount(int userId, String topic);
+
+    // 查询系统发送给特定主题的未读消息数量
+    int selectTopicUnreadCount(int userId, String topic);
 }

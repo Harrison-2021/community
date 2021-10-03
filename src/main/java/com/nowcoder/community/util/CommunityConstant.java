@@ -31,4 +31,25 @@ public interface CommunityConstant {
 
     /** 实体类型：帖子下一级评论类型*/
     int ENTITY_TYPE_USER = 3;
+
+    /**
+     * 事件类型，帖子,评论
+     */
+
+    String TOPIC_COMMENT = "comment";
+
+    /**
+     * 事件类型，点赞
+     */
+    String TOPIC_LIKE = "like";
+
+    /**
+     * 事件类型，关注
+     */
+    String TOPIC_FOLLOW = "follow";
+
+    /**
+     * 系统用户id
+     */
+    int SYSTEM_USER_ID = 1;
 }
