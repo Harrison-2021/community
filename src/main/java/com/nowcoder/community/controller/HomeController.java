@@ -64,6 +64,7 @@ public class HomeController implements CommunityConstant {
         model.addAttribute("discussPosts", discussPosts);
 
         // 消息列表显示总数
+        // 这部分要在拦截器中操作，因为这是影响全局的变量
         User user = hostHolder.getUser();
         if(user != null) {
             int letterUnreadCount = messageService.findLetterUnreadCount(user.getId(), null);
