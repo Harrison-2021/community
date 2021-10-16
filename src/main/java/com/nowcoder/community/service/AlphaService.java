@@ -21,7 +21,7 @@ import javax.annotation.PreDestroy;
 import java.util.Date;
 
 @Service
-public class AlphaService {
+public class  AlphaService {
     // 测试项目整个依赖注入流程
     @Autowired
     private AlphaDAO alphaDAO;
